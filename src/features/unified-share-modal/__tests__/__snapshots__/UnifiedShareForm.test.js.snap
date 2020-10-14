@@ -96,8 +96,11 @@ exports[`features/unified-share-modal/UnifiedShareForm closeEmailSharedLinkForm(
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -289,8 +292,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should not rende
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -446,8 +452,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should not rende
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -603,8 +612,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -765,8 +777,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -923,8 +938,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1082,8 +1100,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={true}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1212,8 +1233,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={false}
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1371,8 +1395,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={false}
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1530,8 +1557,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={true}
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1690,8 +1720,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={true}
           isExpanded={true}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -1859,8 +1892,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -2017,8 +2053,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -2179,8 +2218,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           }
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -2339,8 +2381,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={true}
           isExpanded={false}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -2499,8 +2544,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={true}
           isExpanded={true}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}
@@ -2629,8 +2677,11 @@ exports[`features/unified-share-modal/UnifiedShareForm render() should render a 
           isContactsFieldEnabled={true}
           isExpanded={true}
           isExternalUserSelected={false}
+          isFetchingJustificationReasons={false}
+          justificationReasons={Array []}
           onContactInput={[Function]}
           onPillCreate={[Function]}
+          onRemoveExternalContacts={[Function]}
           onRequestClose={[Function]}
           onSubmit={[Function]}
           openInviteCollaboratorsSection={[Function]}

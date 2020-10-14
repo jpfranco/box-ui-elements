@@ -17,7 +17,7 @@ const ContactsEmailsTooltip = ({ children, contacts }: Props) => {
     const emailAddresses = contacts.map(({ email }) => email).join(', ');
 
     return (
-        <Tooltip className="MeinTooltiup" text={emailAddresses}>
+        <Tooltip className="bdl-ContactsEmailsTooltip" text={emailAddresses}>
             <span className="bdl-ContactsEmailsTooltip-target">{children}</span>
         </Tooltip>
     );

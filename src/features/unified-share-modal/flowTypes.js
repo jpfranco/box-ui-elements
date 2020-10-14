@@ -257,7 +257,7 @@ type ExternalCollabRestrictionsTypes = {
     /** Determines whether or not external collaboration is restricted by an Access Policy. Note: Only a value of true can be interpreted as the existence of external collab restrictions being known. */
     isExternalCollabRestrictedByAccessPolicy?: boolean,
     /** Function that submits a business justification reason needed in order invite external collaborators to an item. */
-    submitJustificationReason: (params: submitJustificationReasonParamsType) => Promise<void>,
+    submitJustificationReason?: (params: submitJustificationReasonParamsType) => Promise<void>,
 };
 
 // Prop types used in the shared link section of the Unified Share Form

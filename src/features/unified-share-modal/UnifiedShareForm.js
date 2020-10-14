@@ -21,6 +21,7 @@ import { JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB } from './constants';
 
 import type {
     contactType as Contact,
+    getJustificationReasonsResponseType as GetJustificationReasonsResponse,
     item as Item,
     justificationCheckpointType as JustificationCheckpoint,
     USFProps,
@@ -92,7 +93,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         }
     }
 
-    fetchJustificationReasons = async (item: Item, checkpoint: JustificationCheckpoint) => {
+    fetchJustificationReasons = (item: Item, checkpoint: JustificationCheckpoint) => {
         const { getJustificationReasons } = this.props;
 
         if (!getJustificationReasons) {
@@ -100,19 +101,18 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         }
         this.setState({ isFetchingJustificationReasons: true });
 
-        try {
-            const { classificationLabelId, options } = await getJustificationReasons(item, checkpoint);
-
-            this.setState({
-                classificationLabelId,
-                justificationReasons: options.map(({ id, title }) => ({
+        getJustificationReasons(item, checkpoint)
+            .then(({ classificationLabelId, options }: GetJustificationReasonsResponse) => {
+                const justificationReasons = options.map(({ id, title }) => ({
                     displayText: title,
                     value: id,
-                })),
+                }));
+
+                this.setState({ classificationLabelId, justificationReasons });
+            })
+            .finally(() => {
+                this.setState({ isFetchingJustificationReasons: false });
             });
-        } finally {
-            this.setState({ isFetchingJustificationReasons: false });
-        }
     };
 
     isJustificationRequiredForExternalCollabs = () => {
@@ -168,7 +168,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         this.setState({ showCollaboratorList: false });
     };
 
-    handleSendInvites = async (data: Object) => {
+    handleSendInvites = (data: Object) => {
         const { inviteePermissions, sendInvites, submitJustificationReason, trackingProps } = this.props;
         const { inviteCollabsEmailTracking } = trackingProps;
         const { onSendClick } = inviteCollabsEmailTracking;
@@ -177,6 +177,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         const selectedPermissionLevel = inviteePermissionLevel || defaultPermissionLevel;
         const { emails, externalEmails, groupIDs, justificationReason, message } = data;
         const hasExternalInvitees = !!externalEmails && !!externalEmails.length;
+        const shouldSubmitJustificationReason = this.isJustificationRequiredForExternalCollabs() && hasExternalInvitees;
 
         const params = {
             emails: emails.join(','),
@@ -187,8 +188,14 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             numOfInviteeGroups: groupIDs.length,
         };
 
-        if (this.isJustificationRequiredForExternalCollabs() && hasExternalInvitees) {
-            await submitJustificationReason({
+        if (onSendClick) {
+            onSendClick(params);
+        }
+        // Take no action if justification reason is not required
+        let submitJustificationReasonPromise = Promise.resolve();
+
+        if (!!submitJustificationReason && shouldSubmitJustificationReason) {
+            submitJustificationReasonPromise = submitJustificationReason({
                 checkpoint: JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB,
                 classificationLabelId,
                 emails: externalEmails,
@@ -199,11 +206,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             });
         }
 
-        if (onSendClick) {
-            onSendClick(params);
-        }
-
-        return sendInvites(params);
+        return submitJustificationReasonPromise.then(() => sendInvites(params));
     };
 
     handleSendSharedLink = (data: Object) => {
