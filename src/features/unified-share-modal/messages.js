@@ -428,6 +428,25 @@ const messages = defineMessages({
         description: 'Tooltip description to explain recommendation for sharing tooltip',
         id: 'boxui.unifiedShare.recommendedSharingTooltipCalloutText',
     },
+
+    // External collab restrictions and business justifications
+    justificationSelectLabel: {
+        defaultMessage: 'Business Justification',
+        description:
+            'The label displayed at the top of the select field that allows selecting a business justification reason',
+        id: 'boxui.unifiedShare.justificationSelectLabel',
+    },
+    justificationSelectPlaceholder: {
+        defaultMessage: 'Select Justification',
+        description: 'The placeholder text of the select field that allows selecting a business justification reason',
+        id: 'boxui.unifiedShare.justificationSelectPlaceholder',
+    },
+    justificationRequiredError: {
+        defaultMessage: 'Select a justification or remove people to continue',
+        description:
+            'The error message that is displayed when a user tries to send invitations to external collaborators, but a business justification is required before proceeding',
+        id: 'boxui.unifiedShare.justificationRequiredError',
+    },
 });
 
 export default messages;

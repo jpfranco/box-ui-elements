@@ -1,0 +1,23 @@
+@import '../../styles/variables';
+
+.bdl-CollabRestrictionNotice {
+    .bdl-SelectButton {
+        margin-top: 10px;
+    }
+
+    .bdl-SelectFieldDropdown {
+        z-index: $overlay-z-index;
+    }
+}
+
+.bdl-CollabRestrictionNotice-description {
+    margin-bottom: 10px;
+}
+
+.bdl-CollabRestrictionNotice-loadingIndicator {
+    margin: 14px auto 10px auto;
+}
+
+.bdl-CollabRestrictionNotice-removeBtn {
+    text-decoration: underline;
+}

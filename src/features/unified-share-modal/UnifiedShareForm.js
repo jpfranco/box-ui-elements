@@ -17,7 +17,14 @@ import SharedLinkSection from './SharedLinkSection';
 import EmailForm from './EmailForm';
 import getDefaultPermissionLevel from './utils/defaultPermissionLevel';
 import mergeContacts from './utils/mergeContacts';
-import type { contactType as Contact, USFProps } from './flowTypes';
+import { JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB } from './constants';
+
+import type {
+    contactType as Contact,
+    item as Item,
+    justificationCheckpointType as JustificationCheckpoint,
+    USFProps,
+} from './flowTypes';
 import type { SelectOptionProp } from '../../components/select-field/props';
 
 const SHARED_LINKS_COMMUNITY_URL = 'https://community.box.com/t5/Using-Shared-Links/Creating-Shared-Links/ta-p/19523';
@@ -25,11 +32,14 @@ const INVITE_COLLABS_CONTACTS_TYPE = 'inviteCollabsContacts';
 const EMAIL_SHARED_LINK_CONTACTS_TYPE = 'emailSharedLinkContacts';
 
 type State = {
+    classificationLabelId: string,
     emailSharedLinkContacts: Array<Contact>,
     inviteCollabsContacts: Array<Contact>,
     inviteePermissionLevel: string,
     isEmailLinkSectionExpanded: boolean,
+    isFetchingJustificationReasons: boolean,
     isInviteSectionExpanded: boolean,
+    justificationReasons: Array<SelectOptionProp>,
     showCollaboratorList: boolean,
 };
 
@@ -54,14 +64,64 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         super(props);
 
         this.state = {
+            classificationLabelId: '',
             emailSharedLinkContacts: [],
             inviteCollabsContacts: props.initiallySelectedContacts,
             inviteePermissionLevel: '',
             isEmailLinkSectionExpanded: false,
+            isFetchingJustificationReasons: false,
             isInviteSectionExpanded: !!props.initiallySelectedContacts.length,
+            justificationReasons: [],
             showCollaboratorList: false,
         };
     }
+
+    async componentDidUpdate(prevProps: USFProps) {
+        const { areJustificationsAllowed, isExternalCollabRestrictedByAccessPolicy, item } = this.props;
+        const {
+            areJustificationsAllowed: prevAreJustificationsAllowed,
+            isExternalCollabRestrictedByAccessPolicy: prevIsExternalCollabRestrictedByAccessPolicy,
+        } = prevProps;
+
+        const didExternalCollabRestrictionsChange =
+            areJustificationsAllowed !== prevAreJustificationsAllowed ||
+            isExternalCollabRestrictedByAccessPolicy !== prevIsExternalCollabRestrictedByAccessPolicy;
+
+        if (didExternalCollabRestrictionsChange && this.isJustificationRequiredForExternalCollabs()) {
+            this.fetchJustificationReasons(item, JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB);
+        }
+    }
+
+    fetchJustificationReasons = async (item: Item, checkpoint: JustificationCheckpoint) => {
+        const { getJustificationReasons } = this.props;
+
+        if (!getJustificationReasons) {
+            return;
+        }
+        this.setState({ isFetchingJustificationReasons: true });
+
+        try {
+            const { classificationLabelId, options } = await getJustificationReasons(item, checkpoint);
+
+            this.setState({
+                classificationLabelId,
+                justificationReasons: options.map(({ id, title }) => ({
+                    displayText: title,
+                    value: id,
+                })),
+            });
+        } finally {
+            this.setState({ isFetchingJustificationReasons: false });
+        }
+    };
+
+    isJustificationRequiredForExternalCollabs = () => {
+        const { areJustificationsAllowed, isExternalCollabRestrictedByAccessPolicy } = this.props;
+        const isJustificationRequiredForExternalCollabs =
+            isExternalCollabRestrictedByAccessPolicy && areJustificationsAllowed;
+
+        return isJustificationRequiredForExternalCollabs;
+    };
 
     handleInviteCollabPillCreate = (pills: Array<SelectOptionProp | Contact>) => {
         return this.onPillCreate(INVITE_COLLABS_CONTACTS_TYPE, pills);
@@ -108,14 +168,16 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         this.setState({ showCollaboratorList: false });
     };
 
-    handleSendInvites = (data: Object) => {
-        const { inviteePermissions, sendInvites, trackingProps } = this.props;
+    handleSendInvites = async (data: Object) => {
+        const { inviteePermissions, sendInvites, submitJustificationReason, trackingProps } = this.props;
         const { inviteCollabsEmailTracking } = trackingProps;
         const { onSendClick } = inviteCollabsEmailTracking;
-        const { inviteePermissionLevel } = this.state;
+        const { classificationLabelId, inviteePermissionLevel } = this.state;
         const defaultPermissionLevel = getDefaultPermissionLevel(inviteePermissions);
         const selectedPermissionLevel = inviteePermissionLevel || defaultPermissionLevel;
-        const { emails, groupIDs, message } = data;
+        const { emails, externalEmails, groupIDs, justificationReason, message } = data;
+        const hasExternalInvitees = !!externalEmails && !!externalEmails.length;
+
         const params = {
             emails: emails.join(','),
             groupIDs: groupIDs.join(','),
@@ -124,6 +186,18 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             numsOfInvitees: emails.length,
             numOfInviteeGroups: groupIDs.length,
         };
+
+        if (this.isJustificationRequiredForExternalCollabs() && hasExternalInvitees) {
+            await submitJustificationReason({
+                checkpoint: JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB,
+                classificationLabelId,
+                emails: externalEmails,
+                justificationReason: {
+                    id: justificationReason.value,
+                    title: justificationReason.displayText,
+                },
+            });
+        }
 
         if (onSendClick) {
             onSendClick(params);
@@ -162,6 +236,15 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         if (onInviteePermissionChange) {
             onInviteePermissionChange(permissionLevel);
         }
+    };
+
+    handleRemoveExternalInviteCollabsContacts = () => {
+        const { inviteCollabsContacts } = this.state;
+        const filteredInviteCollabsContacts = inviteCollabsContacts.filter(({ isExternalUser }) => !isExternalUser);
+
+        this.setState({
+            inviteCollabsContacts: filteredInviteCollabsContacts,
+        });
     };
 
     onPillCreate = (type: string, pills: Array<SelectOptionProp | Contact>) => {
@@ -292,6 +375,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             getCollaboratorContacts,
             getContactAvatarUrl,
             handleFtuxCloseClick,
+            isExternalCollabRestrictedByAccessPolicy,
             item,
             recommendedSharingTooltipCalloutName = null,
             sendInvitesError,
@@ -304,7 +388,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             trackingProps,
         } = this.props;
         const { type } = item;
-        const { isInviteSectionExpanded } = this.state;
+        const { isFetchingJustificationReasons, isInviteSectionExpanded, justificationReasons } = this.state;
         const { inviteCollabsEmailTracking, modalTracking } = trackingProps;
         const contactsFieldDisabledTooltip =
             type === ITEM_TYPE_WEBLINK ? (
@@ -365,16 +449,21 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
                             inlineNotice={inlineNotice}
                             isContactsFieldEnabled={canInvite}
                             isExpanded={isInviteSectionExpanded}
+                            isFetchingJustificationReasons={isFetchingJustificationReasons}
                             isExternalUserSelected={this.hasExternalContact(INVITE_COLLABS_CONTACTS_TYPE)}
+                            isJustificationRequiredForExternalUsers={this.isJustificationRequiredForExternalCollabs()}
+                            justificationReasons={justificationReasons}
                             onContactInput={this.openInviteCollaborators}
                             onPillCreate={this.handleInviteCollabPillCreate}
                             onRequestClose={this.closeInviteCollaborators}
+                            onRemoveExternalContacts={this.handleRemoveExternalInviteCollabsContacts}
                             onSubmit={this.handleSendInvites}
                             openInviteCollaboratorsSection={this.openInviteCollaboratorsSection}
                             recommendedSharingTooltipCalloutName={recommendedSharingTooltipCalloutName}
                             showEnterEmailsCallout={showEnterEmailsCallout}
                             submitting={submitting}
                             selectedContacts={this.state.inviteCollabsContacts}
+                            shouldInvalidateExternalCollabs={isExternalCollabRestrictedByAccessPolicy}
                             suggestedCollaborators={suggestedCollaborators}
                             updateSelectedContacts={this.updateInviteCollabsContacts}
                             {...inviteCollabsEmailTracking}
