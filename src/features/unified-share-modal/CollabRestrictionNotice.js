@@ -3,6 +3,7 @@
 import * as React from 'react';
 import noop from 'lodash/noop';
 import getProp from 'lodash/get';
+import uniqueId from 'lodash/uniqueId';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import type { InjectIntlProvidedProps } from 'react-intl';
 
@@ -26,8 +27,9 @@ type Props = {
     error?: React.Node,
     isLoading?: boolean,
     justificationReasons: Array<SelectOptionProp>,
-    onRemoveExternalContacts: () => void,
+    onRemoveRestrictedExternalContacts: () => void,
     onSelectJustificationReason: (justificationReasonOption: SelectOptionProp) => void,
+    restrictedExternalEmails: Array<string>,
     selectedContacts: Array<Contact>,
     selectedJustificationReason: ?SelectOptionProp,
 } & InjectIntlProvidedProps;
@@ -37,19 +39,21 @@ const CollabRestrictionNotice = ({
     intl,
     isLoading,
     justificationReasons,
-    onRemoveExternalContacts,
+    onRemoveRestrictedExternalContacts,
     onSelectJustificationReason,
+    restrictedExternalEmails,
     selectedContacts,
     selectedJustificationReason,
 }: Props) => {
-    const externalContacts = selectedContacts.filter(({ isExternalUser }) => isExternalUser);
-    const externalContactCount = externalContacts.length;
+    const compMessageId = uniqueId('compMessage');
+    const restrictedExternalContacts = selectedContacts.filter(({ value }) => restrictedExternalEmails.includes(value));
+    const restrictedExternalContactCount = restrictedExternalContacts.length;
 
     const RemoveButton = ({ children }: { children: React.Node }) => (
         <PlainButton
             className="bdl-CollabRestrictionNotice-removeBtn"
             data-resin-target="removeBtn"
-            onClick={onRemoveExternalContacts}
+            onClick={onRemoveRestrictedExternalContacts}
         >
             {children}
         </PlainButton>
@@ -62,32 +66,37 @@ const CollabRestrictionNotice = ({
 
     const noticeDescriptionSingular = (
         <FormattedCompMessage
+            key={compMessageId}
             description="Notice to display when sharing a file with external collaborators requires a business justification to be provided."
             id="boxui.unifiedShare.businessJustificationRequiredSingular"
         >
             This classified content requires business justification to collaborate with{' '}
-            <ContactsEmailsTooltip contacts={externalContacts}>1 person</ContactsEmailsTooltip>. Select a business
-            justification below or <RemoveButton>remove them</RemoveButton> to continue.
+            <ContactsEmailsTooltip contacts={restrictedExternalContacts}>1 person</ContactsEmailsTooltip>. Select a
+            business justification below or <RemoveButton>remove them</RemoveButton> to continue.
         </FormattedCompMessage>
     );
 
     const noticeDescriptionPlural = (
         <FormattedCompMessage
-            key={externalContactCount}
+            key={compMessageId}
             description="Notice to display when sharing a file with external collaborators requires a business justification to be provided."
             id="boxui.unifiedShare.businessJustificationRequiredPlural"
         >
             This classified content requires business justification to collaborate with{' '}
-            <ContactsEmailsTooltip contacts={externalContacts}>
-                <Param value={externalContactCount} description="Number of external collborators currently selected" />{' '}
+            <ContactsEmailsTooltip contacts={restrictedExternalContacts}>
+                <Param
+                    value={restrictedExternalContactCount}
+                    description="Number of external collborators currently selected"
+                />{' '}
                 people
             </ContactsEmailsTooltip>
             . Select a business justification below or <RemoveButton>remove them</RemoveButton> to continue.
         </FormattedCompMessage>
     );
 
-    const noticeDescription = externalContactCount === 1 ? noticeDescriptionSingular : noticeDescriptionPlural;
     const selectedValue = getProp(selectedJustificationReason, 'value', null);
+    const noticeDescription =
+        restrictedExternalContactCount === 1 ? noticeDescriptionSingular : noticeDescriptionPlural;
 
     return (
         <InlineNotice
@@ -117,7 +126,7 @@ CollabRestrictionNotice.displayName = 'CollabRestrictionNotice';
 
 CollabRestrictionNotice.defaultProps = {
     justificationReasons: [],
-    onRemoveExternalContacts: noop,
+    onRemoveRestrictedExternalContacts: noop,
     onSelectJustificationReason: noop,
 };
 

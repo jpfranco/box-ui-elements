@@ -247,15 +247,15 @@ type InviteSectionTypes = {
 // Additional invite section types related with external collab restrictions
 // enforced by Access Policies and business justifications for the same.
 type ExternalCollabRestrictionsTypes = {
-    /** Determines whether or not a business justification can be provided to bypass external collab restrictions */
-    areJustificationsAllowed?: boolean,
     /** Function that fetches the array of justification reason options to display on the justification select field */
     getJustificationReasons?: (
         item: item,
         checkpoint: justificationCheckpointType,
     ) => Promise<getJustificationReasonsResponseType>,
-    /** Determines whether or not external collaboration is restricted by an Access Policy. Note: Only a value of true can be interpreted as the existence of external collab restrictions being known. */
-    isExternalCollabRestrictedByAccessPolicy?: boolean,
+    /** Determines whether or not a business justification can be provided to bypass external collab restrictions */
+    isCollabRestrictionJustificationAllowed?: boolean,
+    /** An array of all the external collab email addresses that have been determined to be restriced by an access policy. */
+    restrictedExternalCollabEmails: Array<string>,
     /** Function that submits a business justification reason needed in order invite external collaborators to an item. */
     submitJustificationReason?: (params: submitJustificationReasonParamsType) => Promise<void>,
 };

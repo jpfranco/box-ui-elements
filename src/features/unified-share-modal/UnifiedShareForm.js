@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import isEmpty from 'lodash/isEmpty';
 import { FormattedMessage, injectIntl } from 'react-intl';
 
 import LoadingIndicatorWrapper from '../../components/loading-indicator/LoadingIndicatorWrapper';
@@ -50,6 +51,7 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         initiallySelectedContacts: [],
         createSharedLinkOnLoad: false,
         focusSharedLinkOnLoad: false,
+        restrictedExternalCollabEmails: [],
         trackingProps: {
             collaboratorListTracking: {},
             inviteCollabsEmailTracking: {},
@@ -78,49 +80,54 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
     }
 
     async componentDidUpdate(prevProps: USFProps) {
-        const { areJustificationsAllowed, isExternalCollabRestrictedByAccessPolicy, item } = this.props;
+        const { isCollabRestrictionJustificationAllowed, item, restrictedExternalCollabEmails } = this.props;
         const {
-            areJustificationsAllowed: prevAreJustificationsAllowed,
-            isExternalCollabRestrictedByAccessPolicy: prevIsExternalCollabRestrictedByAccessPolicy,
+            isCollabRestrictionJustificationAllowed: prevIsCollabRestrictionJustificationAllowed,
+            restrictedExternalCollabEmails: prevRestrictedExternalCollabEmails,
         } = prevProps;
 
         const didExternalCollabRestrictionsChange =
-            areJustificationsAllowed !== prevAreJustificationsAllowed ||
-            isExternalCollabRestrictedByAccessPolicy !== prevIsExternalCollabRestrictedByAccessPolicy;
+            restrictedExternalCollabEmails !== prevRestrictedExternalCollabEmails ||
+            isCollabRestrictionJustificationAllowed !== prevIsCollabRestrictionJustificationAllowed;
 
-        if (didExternalCollabRestrictionsChange && this.isJustificationRequiredForExternalCollabs()) {
+        if (didExternalCollabRestrictionsChange && this.shouldRequireExternalCollabJustification()) {
             this.fetchJustificationReasons(item, JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB);
         }
     }
 
     fetchJustificationReasons = (item: Item, checkpoint: JustificationCheckpoint) => {
+        const { justificationReasons } = this.state;
         const { getJustificationReasons } = this.props;
+        const hasFetchedJustificationReasons = !!justificationReasons.length;
 
-        if (!getJustificationReasons) {
+        if (!getJustificationReasons || hasFetchedJustificationReasons) {
             return;
         }
         this.setState({ isFetchingJustificationReasons: true });
 
         getJustificationReasons(item, checkpoint)
             .then(({ classificationLabelId, options }: GetJustificationReasonsResponse) => {
-                const justificationReasons = options.map(({ id, title }) => ({
-                    displayText: title,
-                    value: id,
-                }));
-
-                this.setState({ classificationLabelId, justificationReasons });
+                this.setState({
+                    classificationLabelId,
+                    justificationReasons: options.map(({ id, title }) => ({
+                        displayText: title,
+                        value: id,
+                    })),
+                });
             })
             .finally(() => {
                 this.setState({ isFetchingJustificationReasons: false });
             });
     };
 
-    isJustificationRequiredForExternalCollabs = () => {
-        const { areJustificationsAllowed, isExternalCollabRestrictedByAccessPolicy } = this.props;
-        const isJustificationRequiredForExternalCollabs =
-            isExternalCollabRestrictedByAccessPolicy && areJustificationsAllowed;
+    shouldRequireExternalCollabJustification = () => {
+        const { inviteCollabsContacts } = this.state;
+        const { isCollabRestrictionJustificationAllowed, restrictedExternalCollabEmails } = this.props;
 
-        return isJustificationRequiredForExternalCollabs;
+        const hasRestrictedExternalCollabs = inviteCollabsContacts.some(({ value }) =>
+            restrictedExternalCollabEmails.includes(value),
+        );
+        return hasRestrictedExternalCollabs && isCollabRestrictionJustificationAllowed;
     };
 
     handleInviteCollabPillCreate = (pills: Array<SelectOptionProp | Contact>) => {
@@ -169,15 +176,19 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
     };
 
     handleSendInvites = (data: Object) => {
-        const { inviteePermissions, sendInvites, submitJustificationReason, trackingProps } = this.props;
+        const {
+            isCollabRestrictionJustificationAllowed,
+            inviteePermissions,
+            sendInvites,
+            submitJustificationReason,
+            trackingProps,
+        } = this.props;
         const { inviteCollabsEmailTracking } = trackingProps;
         const { onSendClick } = inviteCollabsEmailTracking;
         const { classificationLabelId, inviteePermissionLevel } = this.state;
         const defaultPermissionLevel = getDefaultPermissionLevel(inviteePermissions);
         const selectedPermissionLevel = inviteePermissionLevel || defaultPermissionLevel;
-        const { emails, externalEmails, groupIDs, justificationReason, message } = data;
-        const hasExternalInvitees = !!externalEmails && !!externalEmails.length;
-        const shouldSubmitJustificationReason = this.isJustificationRequiredForExternalCollabs() && hasExternalInvitees;
+        const { emails, groupIDs, justificationReason, message, restrictedExternalEmails } = data;
 
         const params = {
             emails: emails.join(','),
@@ -191,14 +202,19 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         if (onSendClick) {
             onSendClick(params);
         }
-        // Take no action if justification reason is not required
+
+        // By default do not submit justification reason if justification is not required
         let submitJustificationReasonPromise = Promise.resolve();
+
+        const hasRestrictedExternalInvitees = !isEmpty(restrictedExternalEmails);
+        const shouldSubmitJustificationReason =
+            hasRestrictedExternalInvitees && isCollabRestrictionJustificationAllowed;
 
         if (!!submitJustificationReason && shouldSubmitJustificationReason) {
             submitJustificationReasonPromise = submitJustificationReason({
                 checkpoint: JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB,
                 classificationLabelId,
-                emails: externalEmails,
+                emails: restrictedExternalEmails,
                 justificationReason: {
                     id: justificationReason.value,
                     title: justificationReason.displayText,
@@ -239,15 +255,6 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
         if (onInviteePermissionChange) {
             onInviteePermissionChange(permissionLevel);
         }
-    };
-
-    handleRemoveExternalInviteCollabsContacts = () => {
-        const { inviteCollabsContacts } = this.state;
-        const filteredInviteCollabsContacts = inviteCollabsContacts.filter(({ isExternalUser }) => !isExternalUser);
-
-        this.setState({
-            inviteCollabsContacts: filteredInviteCollabsContacts,
-        });
     };
 
     onPillCreate = (type: string, pills: Array<SelectOptionProp | Contact>) => {
@@ -378,9 +385,9 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
             getCollaboratorContacts,
             getContactAvatarUrl,
             handleFtuxCloseClick,
-            isExternalCollabRestrictedByAccessPolicy,
             item,
             recommendedSharingTooltipCalloutName = null,
+            restrictedExternalCollabEmails,
             sendInvitesError,
             shouldRenderFTUXTooltip,
             showEnterEmailsCallout = false,
@@ -454,19 +461,18 @@ class UnifiedShareForm extends React.Component<USFProps, State> {
                             isExpanded={isInviteSectionExpanded}
                             isFetchingJustificationReasons={isFetchingJustificationReasons}
                             isExternalUserSelected={this.hasExternalContact(INVITE_COLLABS_CONTACTS_TYPE)}
-                            isJustificationRequiredForExternalUsers={this.isJustificationRequiredForExternalCollabs()}
                             justificationReasons={justificationReasons}
                             onContactInput={this.openInviteCollaborators}
                             onPillCreate={this.handleInviteCollabPillCreate}
                             onRequestClose={this.closeInviteCollaborators}
-                            onRemoveExternalContacts={this.handleRemoveExternalInviteCollabsContacts}
                             onSubmit={this.handleSendInvites}
                             openInviteCollaboratorsSection={this.openInviteCollaboratorsSection}
                             recommendedSharingTooltipCalloutName={recommendedSharingTooltipCalloutName}
+                            restrictedExternalEmails={restrictedExternalCollabEmails}
+                            shouldRequireExternalUserJustification={this.shouldRequireExternalCollabJustification()}
                             showEnterEmailsCallout={showEnterEmailsCallout}
                             submitting={submitting}
                             selectedContacts={this.state.inviteCollabsContacts}
-                            shouldInvalidateExternalCollabs={isExternalCollabRestrictedByAccessPolicy}
                             suggestedCollaborators={suggestedCollaborators}
                             updateSelectedContacts={this.updateInviteCollabsContacts}
                             {...inviteCollabsEmailTracking}
