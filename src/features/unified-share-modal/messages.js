@@ -447,6 +447,12 @@ const messages = defineMessages({
             'The error message that is displayed when a user tries to send invitations to external collaborators, but a business justification is required before proceeding',
         id: 'boxui.unifiedShare.justificationRequiredError',
     },
+    contactEmailsTooltipText: {
+        defaultMessage: '{emails}, and {remainingEmailsCount} more',
+        description:
+            'Text to show when the number of contact email addresses displayed on a tooltip exceeds the maximum amount that can be displayed',
+        id: 'boxui.unifiedShare.contactEmailsTooltipText',
+    },
 });
 
 export default messages;

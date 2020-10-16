@@ -55,7 +55,7 @@ type Props = {
     restrictedExternalEmails: Array<string>,
     selectedContacts: Array<Contact>,
     sendButtonProps?: Object,
-    shouldRequireExternalUserJustification?: boolean,
+    shouldRequireExternalUserJustification: boolean,
     showEnterEmailsCallout: boolean,
     submitting: boolean,
     suggestedCollaborators?: SuggestedCollabLookup,
@@ -75,6 +75,7 @@ class EmailForm extends React.Component<Props, State> {
         contactsFieldDisabledTooltip: null,
         justificationReasons: [],
         restrictedExternalEmails: [],
+        shouldRequireExternalUserJustification: false,
     };
 
     constructor(props: Props) {
@@ -272,15 +273,19 @@ class EmailForm extends React.Component<Props, State> {
 
     isValidContactPill = (contactPill: string | Contact): boolean => {
         let isValid = true;
+        const { selectedJustificationReason } = this.state;
+        const { shouldRequireExternalUserJustification } = this.props;
+
         if (isString(contactPill)) {
             // If we receive a string it means we're validating unparsed
             // pill selector input. Check that we have a valid email
             isValid = emailValidator(contactPill);
         } else {
+            const hasRequiredJustification = !!selectedJustificationReason && shouldRequireExternalUserJustification;
             // Invalid emails are filtered out by ContactsField when parsing
             // new pills, so parsed pills can currently only be invalid
             // when user is external and external collab is restricted
-            isValid = !this.isRestrictedExternalEmail(contactPill.value);
+            isValid = !this.isRestrictedExternalEmail(contactPill.value) || hasRequiredJustification;
         }
         return isValid;
     };
