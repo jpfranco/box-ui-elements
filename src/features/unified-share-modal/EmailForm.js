@@ -18,7 +18,7 @@ import { emailValidator } from '../../utils/validators';
 import type { InlineNoticeType } from '../../common/types/core';
 import IconGlobe from '../../icons/general/IconGlobe';
 
-import CollabRestrictionNotice from './CollabRestrictionNotice';
+import ContactRestrictionNotice from './ContactRestrictionNotice';
 import ContactsField from './ContactsField';
 import messages from './messages';
 import type { SuggestedCollabLookup, contactType as Contact } from './flowTypes';
@@ -55,7 +55,7 @@ type Props = {
     restrictedExternalEmails: Array<string>,
     selectedContacts: Array<Contact>,
     sendButtonProps?: Object,
-    shouldRequireExternalUserJustification: boolean,
+    shouldRequireExternalContactJustification: boolean,
     showEnterEmailsCallout: boolean,
     submitting: boolean,
     suggestedCollaborators?: SuggestedCollabLookup,
@@ -75,7 +75,7 @@ class EmailForm extends React.Component<Props, State> {
         contactsFieldDisabledTooltip: null,
         justificationReasons: [],
         restrictedExternalEmails: [],
-        shouldRequireExternalUserJustification: false,
+        shouldRequireExternalContactJustification: false,
     };
 
     constructor(props: Props) {
@@ -92,6 +92,23 @@ class EmailForm extends React.Component<Props, State> {
     contactsFieldRef: {
         current: null | PillSelectorDropdown,
     } = React.createRef();
+
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        const { contactsFieldError, justificationReasonsFieldError } = this.state;
+        const {
+            contactsFieldError: prevContactsFieldError,
+            justificationReasonsFieldError: prevJustificationReasonsFieldError,
+        } = prevState;
+
+        // Only display one type of error at a time and give preference
+        // to the one triggered most recently
+        if (!prevContactsFieldError && contactsFieldError) {
+            this.setState({ justificationReasonsFieldError: '' });
+        }
+        if (!prevJustificationReasonsFieldError && justificationReasonsFieldError) {
+            this.setState({ contactsFieldError: '' });
+        }
+    }
 
     handleContactAdd = (contacts: Array<Contact>) => {
         const { selectedContacts, onContactAdd, updateSelectedContacts } = this.props;
@@ -155,10 +172,11 @@ class EmailForm extends React.Component<Props, State> {
 
     validateJustificationReason = () => {
         let justificationReasonsFieldError = '';
-
         const { selectedJustificationReason } = this.state;
-        const { intl, shouldRequireExternalUserJustification } = this.props;
-        const isMissingRequiredJustification = shouldRequireExternalUserJustification && !selectedJustificationReason;
+        const { intl, shouldRequireExternalContactJustification } = this.props;
+
+        const isMissingRequiredJustification =
+            shouldRequireExternalContactJustification && !selectedJustificationReason;
 
         if (isMissingRequiredJustification) {
             justificationReasonsFieldError = intl.formatMessage(messages.justificationRequiredError);
@@ -274,14 +292,14 @@ class EmailForm extends React.Component<Props, State> {
     isValidContactPill = (contactPill: string | Contact): boolean => {
         let isValid = true;
         const { selectedJustificationReason } = this.state;
-        const { shouldRequireExternalUserJustification } = this.props;
+        const { shouldRequireExternalContactJustification } = this.props;
 
         if (isString(contactPill)) {
             // If we receive a string it means we're validating unparsed
             // pill selector input. Check that we have a valid email
             isValid = emailValidator(contactPill);
         } else {
-            const hasRequiredJustification = !!selectedJustificationReason && shouldRequireExternalUserJustification;
+            const hasRequiredJustification = !!selectedJustificationReason && shouldRequireExternalContactJustification;
             // Invalid emails are filtered out by ContactsField when parsing
             // new pills, so parsed pills can currently only be invalid
             // when user is external and external collab is restricted
@@ -356,16 +374,12 @@ class EmailForm extends React.Component<Props, State> {
             ? recommendedSharingTooltipProps
             : ftuxTooltipProps;
 
-        // Prevent two errors from displaying at once. Justification reasons
-        // field errors have priority over contacts field errors
-        const contactsFieldErrorToShow = justificationReasonsFieldError ? '' : contactsFieldError;
-
         const contactsField = (
             <div className="tooltip-target">
                 <Tooltip {...tooltipPropsToRender}>
                     <ContactsField
                         disabled={!isContactsFieldEnabled}
-                        error={contactsFieldErrorToShow}
+                        error={contactsFieldError}
                         fieldRef={this.contactsFieldRef}
                         getContacts={getContacts}
                         getContactAvatarUrl={getContactAvatarUrl}
@@ -395,7 +409,7 @@ class EmailForm extends React.Component<Props, State> {
             );
         }
 
-        const shouldRenderCollabRestrictionNotice = isExpanded && this.hasRestrictedExternalContacts();
+        const shouldRenderContactRestrictionNotice = isExpanded && this.hasRestrictedExternalContacts();
 
         return (
             <form
@@ -407,8 +421,8 @@ class EmailForm extends React.Component<Props, State> {
                 {inlineNotice.content && isExpanded && (
                     <InlineNotice type={inlineNotice.type}>{inlineNotice.content}</InlineNotice>
                 )}
-                {shouldRenderCollabRestrictionNotice && (
-                    <CollabRestrictionNotice
+                {shouldRenderContactRestrictionNotice && (
+                    <ContactRestrictionNotice
                         error={justificationReasonsFieldError}
                         isLoading={isFetchingJustificationReasons}
                         justificationReasons={justificationReasons}

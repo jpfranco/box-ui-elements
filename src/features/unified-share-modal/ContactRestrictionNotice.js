@@ -21,7 +21,7 @@ import messages from './messages';
 import type { SelectOptionProp } from '../../components/select-field/props';
 import type { contactType as Contact } from './flowTypes';
 
-import './CollabRestrictionNotice.scss';
+import './ContactRestrictionNotice.scss';
 
 type Props = {
     error?: React.Node,
@@ -34,7 +34,7 @@ type Props = {
     selectedJustificationReason: ?SelectOptionProp,
 } & InjectIntlProvidedProps;
 
-const CollabRestrictionNotice = ({
+const ContactRestrictionNotice = ({
     error,
     intl,
     isLoading,
@@ -51,7 +51,7 @@ const CollabRestrictionNotice = ({
 
     const RemoveButton = ({ children }: { children: React.Node }) => (
         <PlainButton
-            className="bdl-CollabRestrictionNotice-removeBtn"
+            className="bdl-ContactRestrictionNotice-removeBtn"
             data-resin-target="removeBtn"
             onClick={onRemoveRestrictedExternalContacts}
         >
@@ -100,14 +100,14 @@ const CollabRestrictionNotice = ({
 
     return (
         <InlineNotice
-            className="bdl-CollabRestrictionNotice"
-            data-resin-component="collabRestrictionNotice"
+            className="bdl-ContactRestrictionNotice"
+            data-resin-component="contactRestrictionNotice"
             type="error"
         >
-            <p className="bdl-CollabRestrictionNotice-description">{noticeDescription}</p>
+            <p className="bdl-ContactRestrictionNotice-description">{noticeDescription}</p>
             <Label text={<FormattedMessage {...messages.justificationSelectLabel} />}>
                 {isLoading ? (
-                    <LoadingIndicator className="bdl-CollabRestrictionNotice-loadingIndicator" />
+                    <LoadingIndicator className="bdl-ContactRestrictionNotice-loadingIndicator" />
                 ) : (
                     <SingleSelectField
                         error={error}
@@ -122,12 +122,12 @@ const CollabRestrictionNotice = ({
     );
 };
 
-CollabRestrictionNotice.displayName = 'CollabRestrictionNotice';
+ContactRestrictionNotice.displayName = 'ContactRestrictionNotice';
 
-CollabRestrictionNotice.defaultProps = {
+ContactRestrictionNotice.defaultProps = {
     justificationReasons: [],
     onRemoveRestrictedExternalContacts: noop,
     onSelectJustificationReason: noop,
 };
 
-export default injectIntl(CollabRestrictionNotice);
+export default injectIntl(ContactRestrictionNotice);
