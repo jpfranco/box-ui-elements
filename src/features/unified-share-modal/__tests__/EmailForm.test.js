@@ -185,7 +185,9 @@ describe('features/unified-share-modal/EmailForm', () => {
             const expectedParam = {
                 emails: ['y@example.com'],
                 groupIDs: ['x@example.com'],
+                justificationReason: null,
                 message,
+                restrictedExternalEmails: [],
             };
             const onSubmit = jest.fn().mockReturnValue(Promise.resolve());
             const wrapper = getWrapper({
@@ -207,7 +209,9 @@ describe('features/unified-share-modal/EmailForm', () => {
             const expectedParam = {
                 emails: [],
                 groupIDs: ['x@example.com'],
+                justificationReason: null,
                 message,
+                restrictedExternalEmails: [],
             };
             const onSubmit = jest.fn().mockReturnValue(
                 // eslint-disable-next-line prefer-promise-reject-errors

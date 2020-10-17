@@ -49,6 +49,10 @@ const ContactRestrictionNotice = ({
     const restrictedExternalContacts = selectedContacts.filter(({ value }) => restrictedExternalEmails.includes(value));
     const restrictedExternalContactCount = restrictedExternalContacts.length;
 
+    if (!restrictedExternalContactCount) {
+        return null;
+    }
+
     const RemoveButton = ({ children }: { children: React.Node }) => (
         <PlainButton
             className="bdl-ContactRestrictionNotice-removeBtn"
@@ -62,7 +66,7 @@ const ContactRestrictionNotice = ({
     // TODO:
     // Switch to react-intl v3+ api once migration is complete. FormattedCompMessage is now
     // deprecated and has some issues with components nested within <Plural/>, hence why we
-    // use two messages as a workaround.
+    // use two messages and use unique keys as a workaround.
 
     const noticeDescriptionSingular = (
         <FormattedCompMessage
@@ -110,6 +114,7 @@ const ContactRestrictionNotice = ({
                     <LoadingIndicator className="bdl-ContactRestrictionNotice-loadingIndicator" />
                 ) : (
                     <SingleSelectField
+                        data-resin-target="justificationReasonsSelect"
                         error={error}
                         options={justificationReasons}
                         onChange={onSelectJustificationReason}
@@ -130,4 +135,5 @@ ContactRestrictionNotice.defaultProps = {
     onSelectJustificationReason: noop,
 };
 
+export { ContactRestrictionNotice as ContactRestrictionNoticeComponent };
 export default injectIntl(ContactRestrictionNotice);

@@ -21,6 +21,7 @@ const ContactsEmailsTooltip = ({ children, contacts, maxContacts }: Props) => {
     const contactsToDisplay = take(contacts, maxContacts);
     const remainingContactCount = contacts.length - contactsToDisplay.length;
     const emailsToDisplay = contactsToDisplay.map(({ email }) => email).join(', ');
+    const isDisabled = !emailsToDisplay.length;
 
     const tooltipText = remainingContactCount ? (
         <FormattedMessage
@@ -32,7 +33,7 @@ const ContactsEmailsTooltip = ({ children, contacts, maxContacts }: Props) => {
     );
 
     return (
-        <Tooltip className="bdl-ContactsEmailsTooltip" text={tooltipText}>
+        <Tooltip className="bdl-ContactsEmailsTooltip" text={tooltipText} isDisabled={isDisabled}>
             <span className="bdl-ContactsEmailsTooltip-target">{children}</span>
         </Tooltip>
     );
@@ -41,6 +42,7 @@ const ContactsEmailsTooltip = ({ children, contacts, maxContacts }: Props) => {
 ContactsEmailsTooltip.displayName = 'ContactsEmailsTooltip';
 
 ContactsEmailsTooltip.defaultProps = {
+    contacts: [],
     maxContacts: 10,
 };
 

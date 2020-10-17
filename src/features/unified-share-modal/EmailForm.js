@@ -315,7 +315,11 @@ class EmailForm extends React.Component<Props, State> {
     };
 
     hasRestrictedExternalContacts = () => {
-        const { selectedContacts } = this.props;
+        const { restrictedExternalEmails, selectedContacts } = this.props;
+
+        if (!restrictedExternalEmails.length) {
+            return false;
+        }
 
         return selectedContacts.some(({ value }) => this.isRestrictedExternalEmail(value));
     };
