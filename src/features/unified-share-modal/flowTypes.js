@@ -189,6 +189,31 @@ export type tooltipComponentIdentifierType =
     | 'shared-link-settings'
     | 'shared-link-toggle';
 
+export type justificationCheckpointType =
+    | typeof constants.JUSTIFICATION_CHECKPOINT_COLLAB
+    | typeof constants.JUSTIFICATION_CHECKPOINT_CREATE_SHARED_LINK
+    | typeof constants.JUSTIFICATION_CHECKPOINT_DOWNLOAD
+    | typeof constants.JUSTIFICATION_CHECKPOINT_EXTERNAL_COLLAB;
+
+export type justificationReasonType = {
+    description?: string,
+    id: string,
+    isDetailsRequired?: boolean,
+    title: string,
+};
+export type getJustificationReasonsResponseType = {
+    classificationLabelId: string,
+    options: Array<justificationReasonType>,
+};
+
+export type submitJustificationReasonParamsType = {
+    checkpoint: justificationCheckpointType,
+    classificationLabelId: string,
+    emails: Array<string>,
+    itemTypedID: string,
+    justificationReason: justificationReasonType,
+};
+
 // Prop types used in the invite section of the Unified Share Form
 type InviteSectionTypes = {
     /** Message warning about restrictions regarding inviting collaborators to the item */
@@ -217,6 +242,24 @@ type InviteSectionTypes = {
     showUpgradeOptions: boolean,
     /** Data for suggested collaborators shown at bottom of input box. UI doesn't render when this has length of 0. */
     suggestedCollaborators?: SuggestedCollabLookup,
+};
+
+// Additional invite section types that related with external collab r
+// restrictions and business justifications.
+type ExternalCollabRestrictionsTypes = {
+    /** Function that fetches the array of justification reason options to display on the justification select field */
+    getJustificationReasons?: (
+        itemTypedID: string,
+        checkpoint: justificationCheckpointType,
+    ) => Promise<getJustificationReasonsResponseType>,
+    /** Determines whether or not a business justification can be provided to bypass external collab restrictions */
+    isCollabRestrictionJustificationAllowed?: boolean,
+    /** Function that is called when all restricted external collaborators are removed from the email form */
+    onRemoveAllRestrictedExternalCollabs?: () => void,
+    /** An array of all the external collab email addresses that have been determined to be restriced by an access policy. */
+    restrictedExternalCollabEmails: Array<string>,
+    /** Function that submits a business justification reason needed in order invite external collaborators to an item. */
+    submitJustificationReason?: (params: submitJustificationReasonParamsType) => Promise<void>,
 };
 
 // Prop types used in the shared link section of the Unified Share Form
@@ -283,6 +326,7 @@ export type USMConfig = {
 // Prop types shared by both the Unified Share Modal and the Unified Share Form
 type BaseUnifiedShareProps = CollaboratorAvatarsTypes &
     EmailFormTypes &
+    ExternalCollabRestrictionsTypes &
     InviteSectionTypes &
     SharedLinkSectionTypes & {
         /** Inline message */
