@@ -14,8 +14,16 @@ import type { Controls, ControlsFormat } from './flowTypes';
 
 const STYLE_INLINE: 'inline' = 'inline';
 const STYLE_TOOLTIP: 'tooltip' = 'tooltip';
+
+function lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
 type Props = {
+    category?: string,
+    categoryReason?: string,
     className?: string,
+    classificationReason?: string,
     color?: string,
     controls?: Controls,
     controlsFormat?: ControlsFormat,
@@ -29,10 +37,14 @@ type Props = {
     modifiedBy?: string,
     name?: string,
     onClick?: (event: SyntheticEvent<HTMLButtonElement>) => void,
+    openAiClassification?: string,
 };
 
 const Classification = ({
+    category,
+    categoryReason,
     className = '',
+    classificationReason,
     color,
     controls,
     controlsFormat,
@@ -46,6 +58,7 @@ const Classification = ({
     modifiedBy,
     name,
     onClick,
+    openAiClassification,
 }: Props) => {
     const isClassified = !!name;
     const hasDefinition = !!definition;
@@ -93,9 +106,31 @@ const Classification = ({
                     <p className="bdl-Classification-modifiedBy" data-testid="classification-modifiedby">
                         <FormattedMessage
                             {...modifiedByMessage}
-                            values={{ modifiedAt: formattedModifiedAt, modifiedBy }}
+                            values={{
+                                modifiedAt: formattedModifiedAt,
+                                modifiedBy:
+                                    name === openAiClassification && classificationReason
+                                        ? 'Box Intelligence'
+                                        : modifiedBy,
+                            }}
                         />
+                        {classificationReason && (
+                            <FormattedMessage
+                                {...messages.classificationReason}
+                                values={{ reason: lowerCaseFirstLetter(classificationReason) }}
+                            />
+                        )}
                     </p>
+                </Label>
+            )}
+            {category && (
+                <Label text={<FormattedMessage {...messages.category} />}>
+                    <p className="bdl-Classification-definition">{category}</p>
+                </Label>
+            )}
+            {categoryReason && (
+                <Label text={<FormattedMessage {...messages.categoryReason} />}>
+                    <p className="bdl-Classification-definition">{categoryReason}</p>
                 </Label>
             )}
 

@@ -82,6 +82,21 @@ const messages = defineMessages({
         description: 'Classification label color name as grey',
         id: 'boxui.classification.classificationGrey',
     },
+    category: {
+        defaultMessage: 'Category',
+        description: 'TODO',
+        id: 'boxui.classification.category',
+    },
+    categoryReason: {
+        defaultMessage: 'Category Reason',
+        description: 'TODO',
+        id: 'boxui.classification.categoryReason',
+    },
+    classificationReason: {
+        defaultMessage: ' because {reason}',
+        description: 'TODO',
+        id: 'boxui.classification.classificationReason',
+    },
 });
 
 export default messages;
