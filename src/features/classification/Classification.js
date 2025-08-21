@@ -7,7 +7,9 @@ import Label from '../../components/label/Label';
 import LoadingIndicator from '../../components/loading-indicator/LoadingIndicator';
 import ClassifiedBadge from './ClassifiedBadge';
 import SecurityControls from './security-controls';
+import AppliedByAiClassificationReason from './applied-by-ai-classification-reason/AppliedByAiClassificationReason';
 import messages from './messages';
+
 import './Classification.scss';
 
 import type { Controls, ControlsFormat } from './flowTypes';
@@ -70,6 +72,20 @@ const Classification = ({
 
     const modifiedByMessage = isImportedClassification ? messages.importedBy : messages.modifiedBy;
 
+    // WIP
+    const answer =
+        'This file is marked as Internal Only because it is contains non-public financial results for XYZ corporation.';
+    const citations = [
+        {
+            content: 'content',
+            fileId: 'fileId',
+            location: 'location',
+            title: 'title',
+        },
+    ];
+    const shouldShowAiClassificationReason = messageStyle === STYLE_INLINE;
+    // WIP
+
     return (
         <article className={`bdl-Classification ${className}`}>
             {isClassified && (
@@ -115,6 +131,9 @@ const Classification = ({
                 />
             )}
             {isControlsIndicatorEnabled && <LoadingIndicator />}
+            {shouldShowAiClassificationReason && (
+                <AppliedByAiClassificationReason modifiedAt={modifiedAt} answer={answer} citations={citations} />
+            )}
         </article>
     );
 };
